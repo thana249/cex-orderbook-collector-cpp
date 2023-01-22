@@ -1,0 +1,4 @@
+.git
+cmake-build-debug
+Dockerfile
+docker-compose.yml
