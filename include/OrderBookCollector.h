@@ -12,8 +12,7 @@
 #include "CexApi.h"
 #include "Curl.h"
 
-//static uint FILE_STORAGE_DURATION = 3600; // 1 hour
-static uint FILE_STORAGE_DURATION = 60; // 1 minute (for testing)
+static uint FILE_STORAGE_DURATION = 3600; // 1 hour
 
 class OrderBookCollector {
 public:
