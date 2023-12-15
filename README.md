@@ -19,7 +19,7 @@ This service collects order book data from the Binance and Bitkub cryptocurrency
 3. Start the service: `docker-compose up`
 
 ## Usage
-The service will automatically collect and save the order book data to a file named "ticker_timestamp.txt" in the project output directory.
+The service will automatically collect and save the order book data to a file named "[ticker]-[timestamp].txt" in the project output directory.
 
 ## Configuration
 You can configure the service by editing the `config.json` file in the config directory.

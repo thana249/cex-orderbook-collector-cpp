@@ -156,7 +156,7 @@ void OrderBookCollector::saveOrderBooksToFile(const std::string &ticker,
     ss.clear();
 
     // Create the file name with the format "ticker_currentTimeBlock.txt"
-    ss << ticker << "-" << currentTimeBlock << ".txt";
+    ss << ticker << "-" << t << ".txt";
     std::string filePath = output_path_ + "/" + ss.str();
     std::cout << "[" << timeStr << "] Saving " << filePath << std::endl;
 
