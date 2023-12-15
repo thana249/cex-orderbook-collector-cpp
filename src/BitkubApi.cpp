@@ -8,6 +8,7 @@
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>
 #include <iostream>
+#include <chrono>
 
 std::unordered_set<std::string> BitkubApi::getAllTickers() const {
     // Make an HTTP GET request
@@ -50,11 +51,27 @@ void BitkubApi::getOrderBook(const Curl &curl, const std::string &ticker, std::s
         std::cout<< "[ERROR] "<< responseBody;
         return;
     }
-    // Convert json object to string
-    rapidjson::StringBuffer buffer;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-    document["result"].Accept(writer);
+
+    // Create a new JSON object for the result
+    rapidjson::Document resultJson;
+    resultJson.SetObject();
+    rapidjson::Document::AllocatorType& allocator = resultJson.GetAllocator();
+
+    // Add current time to the JSON object
+    auto currentTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    resultJson.AddMember("time", rapidjson::Value().SetInt64(static_cast<int64_t>(currentTime)), allocator);
+
+    // Directly add the "result" part of the response to the JSON object
+    rapidjson::Value responseValue(rapidjson::kObjectType);
+    responseValue.CopyFrom(document["result"], allocator);
+    resultJson.AddMember("response", responseValue, allocator);
+
+    // Convert the result JSON object to string
+    rapidjson::StringBuffer resultBuffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(resultBuffer);
+    resultJson.Accept(writer);
+
     // Append the result to the result string
-    result += buffer.GetString();
+    result += resultBuffer.GetString();
     result += "\n";
 }

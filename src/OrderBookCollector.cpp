@@ -129,8 +129,14 @@ void OrderBookCollector::collect(const std::string &ticker) const {
         // Get the order book data from the cex_api_ and append it to the current order book data
         cex_api_.getOrderBook(curl, ticker, *currentOrderBookData);
 
-        // Sleep for 100 milliseconds
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        // Convert currentTime to milliseconds and calculate the time to sleep
+        unsigned long long currentTimeMillis = static_cast<unsigned long long>(currentTime) * 1000; // Convert seconds to milliseconds
+        unsigned long long interval_in_milliseconds = request_interval_ * 1000; // Convert seconds to milliseconds
+        unsigned long long remainder = currentTimeMillis % interval_in_milliseconds;
+
+        if (remainder > 0) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(interval_in_milliseconds - remainder));
+        }
     }
     std::cout << "Stop collecting order book [" + ticker << "]" << std::endl;
 }
@@ -150,7 +156,7 @@ void OrderBookCollector::saveOrderBooksToFile(const std::string &ticker,
     ss.clear();
 
     // Create the file name with the format "ticker_currentTimeBlock.txt"
-    ss << ticker << "_" << currentTimeBlock << ".txt";
+    ss << ticker << "-" << currentTimeBlock << ".txt";
     std::string filePath = output_path_ + "/" + ss.str();
     std::cout << "[" << timeStr << "] Saving " << filePath << std::endl;
 

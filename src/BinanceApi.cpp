@@ -6,7 +6,9 @@
 
 #include <rapidjson/document.h>
 #include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 #include <iostream>
+#include <chrono>
 
 std::unordered_set<std::string> BinanceApi::getAllTickers() const {
     // Make an HTTP GET request
@@ -37,7 +39,35 @@ void BinanceApi::getOrderBook(const Curl &curl, const std::string &ticker, std::
         std::cout<< "[ERROR] status code = "<< statusCode<< std::endl;
         return;
     }
-    // append the response body to the result string
-    result += responseBody;
+
+    // Parse json response
+    rapidjson::Document document;
+    document.Parse(responseBody.c_str());
+
+    // Check if parsing succeeds
+    if (document.HasParseError()) {
+        std::cout << "[ERROR] Failed to parse response body as JSON" << std::endl;
+        return;
+    }
+
+    // Create a new JSON object for the result
+    rapidjson::Document resultJson;
+    resultJson.SetObject();
+    rapidjson::Document::AllocatorType& allocator = resultJson.GetAllocator();
+
+    // Add current time to the JSON object
+    auto currentTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    resultJson.AddMember("time", rapidjson::Value().SetInt64(static_cast<int64_t>(currentTime)), allocator);
+
+    // Add the original response to the JSON object
+    resultJson.AddMember("response", document, allocator);
+
+    // Convert the result JSON object to string
+    rapidjson::StringBuffer resultBuffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(resultBuffer);
+    resultJson.Accept(writer);
+
+    // Append the result to the result string
+    result += resultBuffer.GetString();
     result += "\n";
 }
